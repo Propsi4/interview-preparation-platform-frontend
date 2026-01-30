@@ -3,6 +3,7 @@ import { deleteSession, getSessionPrice, listSessions, renameSession } from '../
 import type { ChatSessionOverview } from '../api/types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { formatDateTime } from '../utils/format'
+import { v4 as uuidv4 } from 'uuid';
 
 const SessionsPage = () => {
   const [sessions, setSessions] = useState<ChatSessionOverview[]>([])
@@ -10,7 +11,7 @@ const SessionsPage = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [currentSessionId, setCurrentSessionId] = useLocalStorage(
     'ipp_session_id',
-    crypto.randomUUID(),
+    uuidv4(),
   )
 
   const loadSessions = useCallback(async () => {
