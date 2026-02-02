@@ -45,6 +45,12 @@ export const getScrapeProgress = async (
   return data
 }
 
+export const deleteSearchQuery = async (
+  searchQueryId: number,
+): Promise<void> => {
+  await http.delete(`/scrapers/queries/${searchQueryId}`)
+}
+
 export const listSessions = async (): Promise<ChatSessionOverview[]> => {
   const { data } = await http.get<ChatSessionOverview[]>(
     '/conversation_history/sessions',

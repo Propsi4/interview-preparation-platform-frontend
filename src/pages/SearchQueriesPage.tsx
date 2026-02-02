@@ -5,11 +5,13 @@ import {
   Loader2,
   Database,
   RefreshCw,
+  Trash2,
 } from 'lucide-react'
 import {
   createSearchQuery,
   getScrapeProgress,
   listSearchQueries,
+  deleteSearchQuery,
 } from '../api/client'
 import type { ProgressResponse, SearchQuery } from '../api/types'
 import { formatDateTime } from '../utils/format'
@@ -63,6 +65,23 @@ const SearchQueriesPage = () => {
       setProgressData((prev) => ({ ...prev, [id]: data }))
     } catch (error) {
       console.error(`Failed to refresh progress for ${id}`, error)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete this search query and all associated data?',
+      )
+    ) {
+      return
+    }
+
+    try {
+      await deleteSearchQuery(id)
+      await loadQueries()
+    } catch (error) {
+      console.error('Failed to delete query', error)
     }
   }
 
@@ -122,9 +141,18 @@ const SearchQueriesPage = () => {
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface/50 text-accent">
                       <Database className="h-5 w-5" />
                     </div>
-                    <span className="rounded-full bg-surface/50 px-2 py-1 text-[10px] font-mono font-medium text-ink/50">
-                      ID: {query.id}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-surface/50 px-2 py-1 text-[10px] font-mono font-medium text-ink/50">
+                        ID: {query.id}
+                      </span>
+                      <button
+                        onClick={() => handleDelete(query.id)}
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-surface/50 text-ink/40 hover:bg-red-500/10 hover:text-red-500 transition"
+                        title="Delete query"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-ink line-clamp-2">
