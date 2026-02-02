@@ -115,7 +115,16 @@ const ChatPage = () => {
   useEffect(() => {
     const initData = async () => {
       if (!sessionId) return
+      
+      setMessages([])
+      setSelectedQueryId(null)
+      setInput('')
+      setStreaming(false)
+      setRecording(false)
+      setStreamingContent('')
+      setStreamingReasoning('')
       setLoading(true)
+
       try {
         const [queriesData, sessionData] = await Promise.all([
           listSearchQueries(),
@@ -473,7 +482,7 @@ const ChatPage = () => {
             
             <div className="space-y-3">
               <button
-                onClick={() => setSessionId(v4())}
+                onClick={() => navigate(`/chat/${v4()}`)}
                 className="w-full flex items-center justify-between rounded-xl bg-surface/50 p-3 text-sm text-ink/80 hover:bg-surface transition"
               >
                 <span>New Session</span>
