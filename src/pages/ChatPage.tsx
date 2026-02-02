@@ -387,7 +387,7 @@ const ChatPage = () => {
                 <option value="pt" className="bg-panel text-ink">Portuguese</option>
                 <option value="zh" className="bg-panel text-ink">Chinese</option>
                 <option value="ja" className="bg-panel text-ink">Japanese</option>
-                <option value="ua" className="bg-panel text-ink">Ukrainian</option>
+                <option value="uk" className="bg-panel text-ink">Ukrainian</option>
               </select>
               <div className="flex-1 text-center text-xs font-bold text-ink/70 group-hover:text-ink transition-colors uppercase ml-2 pointer-events-none">
                 {languageCode}
