@@ -505,7 +505,7 @@ const ChatPage = () => {
                 <span className="text-sm text-ink/80">Auto-play Responses</span>
                 <button 
                   onClick={() => setAutoPlayResponse(!autoPlayResponse)}
-                  className={`w-10 h-6 rounded-full p-1 transition-colors border ${autoPlayResponse ? 'bg-accent border-accent' : 'bg-surface border-white/10'}`}
+                  className={`flex items-center w-10 h-6 rounded-full p-1 transition-colors border ${autoPlayResponse ? 'bg-accent border-accent' : 'bg-surface border-white/10'}`}
                 >
                   <div className={`w-4 h-4 rounded-full bg-white transition-transform ${autoPlayResponse ? 'translate-x-4' : ''}`} />
                 </button>
