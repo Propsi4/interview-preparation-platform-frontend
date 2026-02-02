@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   MessageCircle,
   RotateCcw,
+  Play,
+  Pause,
 } from 'lucide-react'
 import {
   getSessionDetails,
@@ -22,6 +24,50 @@ import {
 } from '../api/client'
 import type { ChatMessage, SearchQuery } from '../api/types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
+import { v4 } from 'uuid'
+
+const VoiceMessage = ({ src, autoPlay }: { src: string; autoPlay?: boolean }) => {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  useEffect(() => {
+    if (autoPlay && audioRef.current) {
+      audioRef.current.play().catch(e => console.error('Auto-play failed', e))
+    }
+  }, [autoPlay])
+
+  const toggle = () => {
+    if (!audioRef.current) return
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-3 bg-black/10 dark:bg-white/10 rounded-xl p-2 pr-4 min-w-[140px] border border-white/5">
+      <button 
+        onClick={toggle}
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-accent text-surface hover:brightness-110 transition shrink-0"
+      >
+        {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current pl-0.5" />}
+      </button>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-xs font-medium opacity-80">Voice Message</span>
+        <span className="text-[10px] opacity-50">Click to play</span>
+      </div>
+      <audio 
+        ref={audioRef} 
+        src={src} 
+        onEnded={() => setIsPlaying(false)} 
+        onPlay={() => setIsPlaying(true)} 
+        onPause={() => setIsPlaying(false)} 
+        className="hidden" 
+      />
+    </div>
+  )
+}
 
 const ChatPage = () => {
   const { sessionId: routeSessionId } = useParams()
@@ -38,16 +84,17 @@ const ChatPage = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [isStreaming, setStreaming] = useState(false)
   const [isRecording, setRecording] = useState(false)
-  const [streamType, setStreamType] = useState<'text' | 'voice'>('text')
   const [loading, setLoading] = useState(true)
   
   // Streaming Data
   const [streamingContent, setStreamingContent] = useState('')
   const [streamingReasoning, setStreamingReasoning] = useState('')
+  const [autoPlayResponse, setAutoPlayResponse] = useState(true)
   
-  // Refs
+  // Audio Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<string[]>([])
 
   useEffect(() => {
     if (routeSessionId) {
@@ -56,7 +103,7 @@ const ChatPage = () => {
       if (sessionId) {
         navigate(`/chat/${sessionId}`, { replace: true })
       } else {
-        const newId = crypto.randomUUID()
+        const newId = v4()
         setSessionId(newId)
         navigate(`/chat/${newId}`, { replace: true })
       }
@@ -147,9 +194,10 @@ const ChatPage = () => {
 
       recorder.onstop = async () => {
         const blob = new Blob(chunks, { type: 'audio/webm' })
+        const audioUrl = URL.createObjectURL(blob)
         stream.getTracks().forEach(t => t.stop())
         if (selectedQueryId) {
-          await handleVoiceUpload(blob)
+          await handleVoiceUpload(blob, audioUrl)
         }
       }
 
@@ -158,13 +206,15 @@ const ChatPage = () => {
       setRecording(true)
     } catch (error) {
       console.error('Mic error', error)
+      alert('Could not access microphone. If you are not on localhost, you need HTTPS to use the microphone.')
     }
   }
 
-  const handleVoiceUpload = async (blob: Blob) => {
+  const handleVoiceUpload = async (blob: Blob, userAudioUrl: string) => {
     setStreaming(true)
     let transcript = ''
     let answer = ''
+    audioChunksRef.current = []
 
     try {
       await streamSpeech(
@@ -177,22 +227,64 @@ const ChatPage = () => {
             const data = event.data as Record<string, unknown>
             if (data.text) {
               transcript = data.text as string
-              setMessages(prev => [...prev, { role: 'user', content: transcript }])
+              setMessages(prev => [...prev, { 
+                role: 'user', 
+                content: transcript,
+                audioUrl: userAudioUrl 
+              }])
             }
           } else if (event.type === 'answer') {
             const data = event.data as Record<string, unknown>
             setStreamingContent(prev => prev + (data.token as string))
             answer += (data.token as string)
+          } else if (event.type === 'audio_chunk') {
+            const data = event.data as Record<string, unknown>
+            if (data.chunk) {
+              audioChunksRef.current.push(data.chunk as string)
+            }
           } else if (event.type === 'complete') {
-            setMessages(prev => [...prev, { role: 'assistant', content: answer }])
+            // Commit text immediately so user sees response
+            setMessages(prev => [...prev, { 
+              role: 'assistant', 
+              content: answer 
+            }])
             setStreamingContent('')
-            setStreaming(false)
           }
         }
       )
+      
+      // Post-stream: Handle Audio Finalization
+      if (audioChunksRef.current.length > 0) {
+        // Convert base64 chunks to blob
+        const byteCharacters = audioChunksRef.current.map(chunk => atob(chunk)).join('')
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const audioBlob = new Blob([byteArray], { type: 'audio/mpeg' }) 
+        const assistantAudioUrl = URL.createObjectURL(audioBlob)
+        
+        // Update the last message (assistant's) with the audio URL
+        setMessages(prev => {
+          const newMessages = [...prev]
+          const lastMsg = newMessages[newMessages.length - 1]
+          if (lastMsg && lastMsg.role === 'assistant') {
+            newMessages[newMessages.length - 1] = {
+              ...lastMsg,
+              audioUrl: assistantAudioUrl
+            }
+          }
+          return newMessages
+        })
+      }
+
     } catch (error) {
       console.error('Speech error', error)
+      alert('Error during speech processing')
+    } finally {
       setStreaming(false)
+      audioChunksRef.current = []
     }
   }
 
@@ -239,6 +331,14 @@ const ChatPage = () => {
                         : 'bg-surface text-ink border-white/5 rounded-tl-none'
                     }`}
                   >
+                    {msg.audioUrl && (
+                      <div className="mb-3">
+                         <VoiceMessage 
+                           src={msg.audioUrl} 
+                           autoPlay={msg.role === 'assistant' && autoPlayResponse && i === messages.length - 1} 
+                         />
+                      </div>
+                    )}
                     {msg.content}
                   </div>
                 </div>
@@ -279,6 +379,8 @@ const ChatPage = () => {
             </button>
             
             <textarea
+              id="chat-input"
+              name="chat-input"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => {
@@ -317,8 +419,10 @@ const ChatPage = () => {
               Context
             </h3>
             <div className="space-y-2">
-              <label className="text-xs text-ink/50">Active Search Query</label>
+              <label htmlFor="context-select" className="text-xs text-ink/50">Active Search Query</label>
               <select
+                id="context-select"
+                name="context-select"
                 disabled={(messages?.length || 0) >= 2}
                 value={selectedQueryId || ''}
                 onChange={e => setSelectedQueryId(Number(e.target.value))}
@@ -341,7 +445,7 @@ const ChatPage = () => {
             
             <div className="space-y-3">
               <button
-                onClick={() => setSessionId(crypto.randomUUID())}
+                onClick={() => setSessionId(v4())}
                 className="w-full flex items-center justify-between rounded-xl bg-surface/50 p-3 text-sm text-ink/80 hover:bg-surface transition"
               >
                 <span>New Session</span>
@@ -358,16 +462,15 @@ const ChatPage = () => {
               </button>
             </div>
 
-            {/* Audio Settings Stub */}
             <div className="mt-8 pt-4 border-t border-surface/50">
               <h4 className="text-xs font-semibold text-ink/60 mb-3">Audio Feedback</h4>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-ink/80">Text-to-Speech</span>
+                <span className="text-sm text-ink/80">Auto-play Responses</span>
                 <button 
-                  onClick={() => setStreamType(prev => prev === 'text' ? 'voice' : 'text')}
-                  className={`w-10 h-6 rounded-full p-1 transition-colors border ${streamType === 'voice' ? 'bg-accent border-accent' : 'bg-surface border-white/10'}`}
+                  onClick={() => setAutoPlayResponse(!autoPlayResponse)}
+                  className={`w-10 h-6 rounded-full p-1 transition-colors border ${autoPlayResponse ? 'bg-accent border-accent' : 'bg-surface border-white/10'}`}
                 >
-                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${streamType === 'voice' ? 'translate-x-4' : ''}`} />
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${autoPlayResponse ? 'translate-x-4' : ''}`} />
                 </button>
               </div>
             </div>
