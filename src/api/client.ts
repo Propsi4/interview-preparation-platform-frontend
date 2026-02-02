@@ -120,9 +120,15 @@ export const getSessionPrice = async (sessionId: string): Promise<number> => {
   return data
 }
 
-export const transcribeSpeech = async (audioBlob: Blob): Promise<string> => {
+export const transcribeSpeech = async (
+  audioBlob: Blob,
+  languageCode?: string,
+): Promise<string> => {
   const formData = new FormData()
   formData.append('audio_file', audioBlob, 'browser_recording.webm')
+  if (languageCode) {
+    formData.append('language', languageCode)
+  }
   const { data } = await http.post<{ text: string }>(
     '/speech/transcribe',
     formData,
@@ -217,6 +223,7 @@ export const streamSpeech = async (
   audioBlob: Blob,
   ttsEnabled: boolean,
   onEvent: StreamCallback,
+  languageCode?: string,
 ): Promise<void> => {
   const wsUrl = toSpeechWsUrl(API_BASE_URL)
   const socket = new WebSocket(wsUrl)
@@ -234,6 +241,7 @@ export const streamSpeech = async (
       search_query_id: searchQueryId,
       tts_enabled: ttsEnabled,
       audio_file_name: 'browser_recording.webm',
+      language_code: languageCode,
     }),
   )
   socket.send(

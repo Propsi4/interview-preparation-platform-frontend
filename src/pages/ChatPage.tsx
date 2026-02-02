@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Play,
   Pause,
+  Globe,
 } from 'lucide-react'
 import {
   getSessionDetails,
@@ -85,6 +86,7 @@ const ChatPage = () => {
   const [isStreaming, setStreaming] = useState(false)
   const [isRecording, setRecording] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [languageCode, setLanguageCode] = useState('en')
   
   // Streaming Data
   const [streamingContent, setStreamingContent] = useState('')
@@ -197,7 +199,7 @@ const ChatPage = () => {
         const audioUrl = URL.createObjectURL(blob)
         stream.getTracks().forEach(t => t.stop())
         if (selectedQueryId) {
-          await handleVoiceUpload(blob, audioUrl)
+          await handleVoiceUpload(blob, audioUrl, languageCode)
         }
       }
 
@@ -210,7 +212,7 @@ const ChatPage = () => {
     }
   }
 
-  const handleVoiceUpload = async (blob: Blob, userAudioUrl: string) => {
+  const handleVoiceUpload = async (blob: Blob, userAudioUrl: string, langCode: string) => {
     setStreaming(true)
     let transcript = ''
     let answer = ''
@@ -250,7 +252,8 @@ const ChatPage = () => {
             }])
             setStreamingContent('')
           }
-        }
+        },
+        langCode
       )
       
       // Post-stream: Handle Audio Finalization
@@ -363,9 +366,34 @@ const ChatPage = () => {
           )}
         </div>
 
-        {/* Input Area */}
+          {/* Input Area */}
         <div className="p-4 bg-panel border-t border-white/5">
-          <div className="relative flex items-end gap-2 rounded-2xl bg-surface border border-white/5 p-2">
+          <div className="relative flex items-center gap-2 rounded-2xl bg-surface border border-white/5 p-2">
+            
+            {/* Language Selector */}
+            <div className="relative flex items-center h-10 px-3 rounded-xl bg-surface border border-white/10 hover:border-accent/50 hover:bg-surface/80 transition group cursor-pointer w-24">
+              <Globe className="h-4 w-4 text-ink/40 group-hover:text-accent transition-colors shrink-0" />
+              <select
+                value={languageCode}
+                onChange={(e) => setLanguageCode(e.target.value)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                title="Select Language"
+              >
+                <option value="en" className="bg-panel text-ink">English</option>
+                <option value="es" className="bg-panel text-ink">Spanish</option>
+                <option value="fr" className="bg-panel text-ink">French</option>
+                <option value="de" className="bg-panel text-ink">German</option>
+                <option value="it" className="bg-panel text-ink">Italian</option>
+                <option value="pt" className="bg-panel text-ink">Portuguese</option>
+                <option value="zh" className="bg-panel text-ink">Chinese</option>
+                <option value="ja" className="bg-panel text-ink">Japanese</option>
+                <option value="ua" className="bg-panel text-ink">Ukrainian</option>
+              </select>
+              <div className="flex-1 text-center text-xs font-bold text-ink/70 group-hover:text-ink transition-colors uppercase ml-2 pointer-events-none">
+                {languageCode}
+              </div>
+            </div>
+
             <button
               onClick={toggleRecording}
               disabled={!selectedQueryId || isStreaming}
