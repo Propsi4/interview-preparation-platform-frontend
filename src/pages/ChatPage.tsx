@@ -388,15 +388,22 @@ const ChatPage = () => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 title="Select Language"
               >
+                <option value="zh" className="bg-panel text-ink">Chinese</option>
+                <option value="nl" className="bg-panel text-ink">Dutch</option>
                 <option value="en" className="bg-panel text-ink">English</option>
-                <option value="es" className="bg-panel text-ink">Spanish</option>
                 <option value="fr" className="bg-panel text-ink">French</option>
                 <option value="de" className="bg-panel text-ink">German</option>
+                <option value="hi" className="bg-panel text-ink">Hindi</option>
+                <option value="id" className="bg-panel text-ink">Indonesian</option>
                 <option value="it" className="bg-panel text-ink">Italian</option>
-                <option value="pt" className="bg-panel text-ink">Portuguese</option>
-                <option value="zh" className="bg-panel text-ink">Chinese</option>
                 <option value="ja" className="bg-panel text-ink">Japanese</option>
+                <option value="ko" className="bg-panel text-ink">Korean</option>
+                <option value="pl" className="bg-panel text-ink">Polish</option>
+                <option value="pt" className="bg-panel text-ink">Portuguese</option>
+                <option value="ru" className="bg-panel text-ink">Russian</option>
+                <option value="es" className="bg-panel text-ink">Spanish</option>
                 <option value="uk" className="bg-panel text-ink">Ukrainian</option>
+                <option value="vi" className="bg-panel text-ink">Vietnamese</option>
               </select>
               <div className="flex-1 text-center text-xs font-bold text-ink/70 group-hover:text-ink transition-colors uppercase ml-2 pointer-events-none">
                 {languageCode}
