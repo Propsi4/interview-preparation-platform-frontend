@@ -33,7 +33,7 @@ const TopBar = () => {
                 : 'bg-panel text-ink/60'
           }`}
         >
-          {health === 'loading' ? 'Checking API' : `API ${health}`}
+          {health === 'loading' ? 'Checking API' : `API ${health.toUpperCase()}`}
         </span>
       </div>
     </header>
