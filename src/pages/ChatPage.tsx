@@ -79,6 +79,7 @@ const ChatPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [searchQueries, setSearchQueries] = useState<SearchQuery[]>([])
   const [selectedQueryId, setSelectedQueryId] = useState<number | null>(null)
+  const [interviewFinished, setInterviewFinished] = useState(false)
   
   // UI State
   const [input, setInput] = useState('')
@@ -135,6 +136,7 @@ const ChatPage = () => {
         
         if (sessionData) {
           setMessages(sessionData.messages || [])
+          setInterviewFinished(sessionData.interview_finished || false)
           if (sessionData.search_query_id) {
             setSelectedQueryId(sessionData.search_query_id)
           }
@@ -175,6 +177,7 @@ const ChatPage = () => {
             setStreamingContent(prev => prev + (event.data.token as string))
           } else if (event.type === 'complete') {
             setMessages(prev => [...prev, { role: 'assistant', content: event.data.response as string }])
+            setInterviewFinished(event.data.interview_finished as boolean || false)
             setStreamingContent('')
             setStreamingReasoning('')
             setStreaming(false)
@@ -255,10 +258,13 @@ const ChatPage = () => {
             }
           } else if (event.type === 'complete') {
             // Commit text immediately so user sees response
+            const data = event.data as Record<string, unknown>
+            setInterviewFinished(data.interview_finished as boolean)
             setMessages(prev => [...prev, { 
               role: 'assistant', 
               content: answer 
             }])
+
             setStreamingContent('')
           }
         },
@@ -314,6 +320,22 @@ const ChatPage = () => {
     <div className="flex h-[calc(100vh-6rem)] gap-6 overflow-hidden">
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col rounded-3xl bg-panel border border-white/5 shadow-soft overflow-hidden relative">
+        {/* Chat Area Header / Status */}
+        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-panel/50 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className={`h-2 w-2 rounded-full ${interviewFinished ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-amber-500 animate-pulse'}`} />
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/70">
+              Interview {interviewFinished ? 'Finished' : 'In Progress'}
+            </span>
+          </div>
+          {interviewFinished && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-bold text-green-500 uppercase tracking-tight">
+              <CheckCircle2 className="h-3 w-3" />
+              Ready for Evaluation
+            </div>
+          )}
+        </div>
+
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-surface scrollbar-track-transparent">
           {loading ? (
             <div className="flex h-full items-center justify-center">
@@ -498,7 +520,7 @@ const ChatPage = () => {
               
               <button
                 onClick={handleEvaluate}
-                disabled={(messages?.length || 0) < 2 || isStreaming}
+                disabled={!interviewFinished}
                 className="w-full flex items-center justify-between rounded-xl bg-accent/10 border border-accent/20 p-3 text-sm text-accent hover:bg-accent hover:text-surface transition disabled:opacity-50"
               >
                 <span>Finish & Evaluate</span>
