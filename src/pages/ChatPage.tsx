@@ -324,9 +324,17 @@ const ChatPage = () => {
         {/* Chat Area Header / Status */}
         <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-panel/50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className={`h-2 w-2 rounded-full ${interviewFinished ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-amber-500 animate-pulse'}`} />
+            <div className={`h-2 w-2 rounded-full ${
+              (messages?.length || 0) === 0 
+                ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]' 
+                : interviewFinished 
+                  ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' 
+                  : 'bg-amber-500 animate-pulse'
+            }`} />
             <span className="text-xs font-bold uppercase tracking-widest text-ink/70">
-              Interview {interviewFinished ? 'Finished' : 'In Progress'}
+              {(messages?.length || 0) === 0 
+                ? 'Start chatting to start the interview' 
+                : `Interview ${interviewFinished ? 'Finished' : 'In Progress'}`}
             </span>
           </div>
           {interviewFinished && (
