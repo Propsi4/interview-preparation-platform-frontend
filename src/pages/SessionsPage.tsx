@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { deleteSession, getSessionPrice, listSessions, renameSession } from '../api/client'
 import type { ChatSessionOverview } from '../api/types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
@@ -6,11 +7,12 @@ import { formatDateTime } from '../utils/format'
 import { v4 as uuidv4 } from 'uuid';
 
 const SessionsPage = () => {
+  const navigate = useNavigate()
   const [sessions, setSessions] = useState<ChatSessionOverview[]>([])
   const [prices, setPrices] = useState<Record<string, number>>({})
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [currentSessionId, setCurrentSessionId] = useLocalStorage(
-    'ipp_session_id',
+    'ipp_active_session',
     uuidv4(),
   )
 
@@ -129,7 +131,10 @@ const SessionsPage = () => {
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => setCurrentSessionId(session.session_id)}
+                        onClick={() => {
+                          setCurrentSessionId(session.session_id)
+                          navigate(`/chat/${session.session_id}`)
+                        }}
                         className={`rounded-lg px-3 py-1 text-xs font-semibold ${
                           currentSessionId === session.session_id
                             ? 'bg-accent text-surface'
