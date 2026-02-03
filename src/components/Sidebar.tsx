@@ -1,28 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import {
-  MessageCircle,
-  LayoutDashboard,
-  Search,
-  ClipboardCheck,
-  Settings,
-} from 'lucide-react'
-
-type NavItem = {
-  label: string
-  to: string
-  icon: React.ComponentType<{ className?: string }>
-}
-
-const primaryItems: NavItem[] = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard },
-  { label: 'Chat', to: '/chat', icon: MessageCircle },
-  { label: 'Search Queries', to: '/search-queries', icon: Search },
-  { label: 'Evaluations', to: '/evaluations', icon: ClipboardCheck },
-]
-
-const secondaryItems: NavItem[] = [
-  { label: 'Sessions', to: '/sessions', icon: Settings },
-]
+import { primaryItems, secondaryItems } from '../constants/navigation'
 
 const Sidebar = () => {
   return (

@@ -1,8 +1,10 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import TopBar from '../components/TopBar'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 const AppShell = () => {
+  usePageTitle()
   return (
     <div className="flex h-screen overflow-hidden bg-surface text-base text-ink">
       <Sidebar />
