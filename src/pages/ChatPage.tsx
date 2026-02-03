@@ -14,7 +14,6 @@ import {
   RotateCcw,
   Play,
   Pause,
-  Globe,
 } from 'lucide-react'
 import {
   getSessionDetails,
@@ -26,6 +25,7 @@ import {
 import type { ChatMessage, SearchQuery } from '../api/types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { v4 } from 'uuid'
+import { Dropdown } from '../components/Dropdown'
 
 const VoiceMessage = ({ src, autoPlay }: { src: string; autoPlay?: boolean }) => {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -402,35 +402,30 @@ const ChatPage = () => {
           <div className="relative flex items-center gap-2 rounded-2xl bg-surface border border-white/5 p-2">
             
             {/* Language Selector */}
-            <div className="relative flex items-center h-10 px-3 rounded-xl bg-surface border border-white/10 hover:border-accent/50 hover:bg-surface/80 transition group cursor-pointer w-24">
-              <Globe className="h-4 w-4 text-ink/40 group-hover:text-accent transition-colors shrink-0" />
-              <select
-                value={languageCode}
-                onChange={(e) => setLanguageCode(e.target.value)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                title="Select Language"
-              >
-                <option value="zh" className="bg-panel text-ink">Chinese</option>
-                <option value="nl" className="bg-panel text-ink">Dutch</option>
-                <option value="en" className="bg-panel text-ink">English</option>
-                <option value="fr" className="bg-panel text-ink">French</option>
-                <option value="de" className="bg-panel text-ink">German</option>
-                <option value="hi" className="bg-panel text-ink">Hindi</option>
-                <option value="id" className="bg-panel text-ink">Indonesian</option>
-                <option value="it" className="bg-panel text-ink">Italian</option>
-                <option value="ja" className="bg-panel text-ink">Japanese</option>
-                <option value="ko" className="bg-panel text-ink">Korean</option>
-                <option value="pl" className="bg-panel text-ink">Polish</option>
-                <option value="pt" className="bg-panel text-ink">Portuguese</option>
-                <option value="ru" className="bg-panel text-ink">Russian</option>
-                <option value="es" className="bg-panel text-ink">Spanish</option>
-                <option value="uk" className="bg-panel text-ink">Ukrainian</option>
-                <option value="vi" className="bg-panel text-ink">Vietnamese</option>
-              </select>
-              <div className="flex-1 text-center text-xs font-bold text-ink/70 group-hover:text-ink transition-colors uppercase ml-2 pointer-events-none">
-                {languageCode}
-              </div>
-            </div>
+            <Dropdown
+              options={[
+                { value: 'zh', label: 'Chinese' },
+                { value: 'nl', label: 'Dutch' },
+                { value: 'en', label: 'English' },
+                { value: 'fr', label: 'French' },
+                { value: 'de', label: 'German' },
+                { value: 'hi', label: 'Hindi' },
+                { value: 'id', label: 'Indonesian' },
+                { value: 'it', label: 'Italian' },
+                { value: 'ja', label: 'Japanese' },
+                { value: 'ko', label: 'Korean' },
+                { value: 'pl', label: 'Polish' },
+                { value: 'pt', label: 'Portuguese' },
+                { value: 'ru', label: 'Russian' },
+                { value: 'es', label: 'Spanish' },
+                { value: 'uk', label: 'Ukrainian' },
+                { value: 'vi', label: 'Vietnamese' },
+              ]}
+              value={languageCode}
+              onChange={(val) => setLanguageCode(val)}
+              className="w-40"
+              id="language-select"
+            />
 
             <button
               onClick={toggleRecording}
@@ -485,20 +480,20 @@ const ChatPage = () => {
               Context
             </h3>
             <div className="space-y-2">
-              <label htmlFor="context-select" className="text-xs text-ink/50">Active Search Query</label>
-              <select
+              <Dropdown
+                label="Active Search Query"
                 id="context-select"
-                name="context-select"
                 disabled={(messages?.length || 0) >= 2}
                 value={selectedQueryId || ''}
-                onChange={e => setSelectedQueryId(Number(e.target.value))}
-                className="w-full rounded-xl bg-surface border border-white/10 px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
-              >
-                <option value="" disabled>Select context...</option>
-                {searchQueries?.map(q => (
-                  <option key={q.id} value={q.id}>{q.query}</option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedQueryId(Number(val))}
+                options={
+                  searchQueries?.map((q) => ({
+                    value: q.id,
+                    label: q.query,
+                  })) || []
+                }
+                placeholder="Select context..."
+              />
             </div>
           </div>
 
