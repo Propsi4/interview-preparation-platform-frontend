@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Play,
   Pause,
+  Globe,
 } from 'lucide-react'
 import {
   getSessionDetails,
@@ -403,6 +404,7 @@ const ChatPage = () => {
             
             {/* Language Selector */}
             <Dropdown
+              leftIcon={<Globe className="h-4 w-4 text-ink/40 shrink-0" />}
               options={[
                 { value: 'zh', label: 'Chinese' },
                 { value: 'nl', label: 'Dutch' },

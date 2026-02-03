@@ -22,6 +22,7 @@ interface DropdownProps {
   className?: string;
   label?: string;
   id?: string;
+  leftIcon?: React.ReactNode;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -33,6 +34,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   className,
   label,
   id,
+  leftIcon,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
@@ -86,9 +88,12 @@ export const Dropdown: React.FC<DropdownProps> = ({
           isOpen && 'border-accent shadow-[0_0_15px_rgba(255,211,105,0.1)]'
         )}
       >
-        <span className={cn('block truncate', !selectedOption && 'text-ink/30')}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
+        <div className="flex items-center gap-2 overflow-hidden">
+          {leftIcon && <div className="shrink-0">{leftIcon}</div>}
+          <span className={cn('block truncate', !selectedOption && 'text-ink/30')}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        </div>
         <ChevronDown
           className={cn(
             'ml-2 h-4 w-4 text-ink/40 transition-transform duration-200',
