@@ -29,10 +29,10 @@ const Sidebar = () => {
     <aside className="flex w-72 flex-col border-r border-white/5 bg-surface px-5 py-6">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-surface">
-          <MessageCircle className="h-5 w-5" />
+          <img src="/favicon.svg" alt="nextround.ai Logo" className="h-10 w-10" />
         </div>
         <div>
-          <p className="text-base font-semibold text-ink">Interview AI</p>
+          <p className="text-base font-semibold text-ink">NextRound.ai</p>
           <p className="text-xs text-ink/70">Interview preparation platform</p>
         </div>
       </div>
