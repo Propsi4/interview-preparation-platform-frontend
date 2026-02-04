@@ -95,6 +95,7 @@ const ChatPage = () => {
   const [streamingContent, setStreamingContent] = useState('')
   const [streamingReasoning, setStreamingReasoning] = useState('')
   const [autoPlayResponse, setAutoPlayResponse] = useState(true)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
   
   // Audio Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -247,7 +248,7 @@ const ChatPage = () => {
         sessionId,
         selectedQueryId!,
         blob,
-        true,
+        ttsEnabled,
         (event) => {
           if (event.type === 'reasoning') {
             setStreamingReasoning(prev => prev + (event.data.token as string))
@@ -452,7 +453,7 @@ const ChatPage = () => {
 
             <button
               onClick={toggleRecording}
-              disabled={!selectedQueryId || isStreaming}
+              disabled={!selectedQueryId || isStreaming || interviewFinished}
               className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${
                 isRecording
                   ? 'bg-red-500 text-white animate-pulse'
@@ -475,12 +476,12 @@ const ChatPage = () => {
               }}
               placeholder={selectedQueryId ? "Type your answer..." : "Select a context first →"}
               className="flex-1 max-h-32 min-h-[2.5rem] bg-transparent py-2.5 px-2 text-sm text-ink placeholder:text-ink/30 focus:outline-none resize-none scrollbar-hide"
-              disabled={!selectedQueryId || isStreaming}
+              disabled={!selectedQueryId || isStreaming || interviewFinished}
             />
             
             <button
               onClick={handleSend}
-              disabled={!input.trim() || !selectedQueryId || isStreaming}
+              disabled={!input.trim() || !selectedQueryId || isStreaming || interviewFinished}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-surface hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               <Send className="h-4 w-4" />
@@ -548,13 +549,23 @@ const ChatPage = () => {
 
             <div className="mt-8 pt-4 border-t border-surface/50">
               <h4 className="text-xs font-semibold text-ink/60 mb-3">Audio Feedback</h4>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-ink/80">Auto-play Responses</span>
                 <button 
                   onClick={() => setAutoPlayResponse(!autoPlayResponse)}
                   className={`flex items-center w-10 h-6 rounded-full p-1 transition-colors border ${autoPlayResponse ? 'bg-accent border-accent' : 'bg-surface border-white/10'}`}
                 >
                   <div className={`w-4 h-4 rounded-full bg-white transition-transform ${autoPlayResponse ? 'translate-x-4' : ''}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-ink/80">Voice Answer (TTS)</span>
+                <button 
+                  onClick={() => setTtsEnabled(!ttsEnabled)}
+                  className={`flex items-center w-10 h-6 rounded-full p-1 transition-colors border ${ttsEnabled ? 'bg-accent border-accent' : 'bg-surface border-white/10'}`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${ttsEnabled ? 'translate-x-4' : ''}`} />
                 </button>
               </div>
             </div>
