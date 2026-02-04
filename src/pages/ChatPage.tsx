@@ -10,11 +10,11 @@ import {
   Loader2,
   Settings as SettingsIcon,
   CheckCircle2,
-  MessageCircle,
   RotateCcw,
   Play,
   Pause,
   Globe,
+  MessageCircle,
 } from 'lucide-react'
 import {
   getSessionDetails,
@@ -27,6 +27,7 @@ import type { ChatMessage, SearchQuery } from '../api/types'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { v4 } from 'uuid'
 import { Dropdown } from '../components/Dropdown'
+import { STARTER_MESSAGES } from '../constants/messages'
 
 const VoiceMessage = ({ src, autoPlay }: { src: string; autoPlay?: boolean }) => {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -150,6 +151,14 @@ const ChatPage = () => {
     }
     void initData()
   }, [sessionId])
+
+  // Effect to handle starter message when messages are empty
+  useEffect(() => {
+    if (!loading && messages.length === 0 && !interviewFinished && selectedQueryId === null) {
+      const randomMessage = STARTER_MESSAGES[Math.floor(Math.random() * STARTER_MESSAGES.length)]
+      setMessages([{ role: 'assistant', content: randomMessage }])
+    }
+  }, [loading, messages, interviewFinished, selectedQueryId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -325,14 +334,14 @@ const ChatPage = () => {
         <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-panel/50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <div className={`h-2 w-2 rounded-full ${
-              (messages?.length || 0) === 0 
+              (messages?.length || 0) <= 1 
                 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]' 
                 : interviewFinished 
                   ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' 
                   : 'bg-amber-500 animate-pulse'
             }`} />
             <span className="text-xs font-bold uppercase tracking-widest text-ink/70">
-              {(messages?.length || 0) === 0 
+              {(messages?.length || 0) <= 1 
                 ? 'Start chatting to start the interview' 
                 : `Interview ${interviewFinished ? 'Finished' : 'In Progress'}`}
             </span>
@@ -346,12 +355,13 @@ const ChatPage = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-surface scrollbar-track-transparent">
+          {/* Loading State & Empty Conversation Starter */}
           {loading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-accent" />
             </div>
-          ) : (messages?.length || 0) === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-center p-8">
+          ) : (messages?.length || 0) <= 1 ? (
+            <div className="flex h-[25vh] flex-col items-center justify-center text-center p-8">
               <div className="h-20 w-20 rounded-full bg-surface/50 flex items-center justify-center mb-6">
                 <MessageCircle className="h-10 w-10 text-ink/20" />
               </div>
@@ -360,50 +370,49 @@ const ChatPage = () => {
                 Select a search query from the sidebar to give the AI context, then type or speak to begin.
               </p>
             </div>
-          ) : (
-            <>
-              {messages?.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl p-4 text-sm leading-relaxed border ${
-                      msg.role === 'user'
-                        ? 'bg-accent text-surface border-accent/20 font-medium rounded-tr-none'
-                        : 'bg-surface text-ink border-white/5 rounded-tl-none'
-                    }`}
-                  >
-                    {msg.audioUrl && (
-                      <div className="mb-3">
-                         <VoiceMessage 
-                           src={msg.audioUrl} 
-                           autoPlay={msg.role === 'assistant' && autoPlayResponse && i === messages.length - 1} 
-                         />
-                      </div>
-                    )}
-                    {msg.content}
+          ) : ( null )
+          }
+          {/* Messages */}
+          {messages?.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] rounded-2xl p-4 text-sm leading-relaxed border ${
+                  msg.role === 'user'
+                    ? 'bg-accent text-surface border-accent/20 font-medium rounded-tr-none'
+                    : 'bg-surface text-ink border-white/5 rounded-tl-none'
+                }`}
+              >
+                {msg.audioUrl && (
+                  <div className="mb-3">
+                      <VoiceMessage 
+                        src={msg.audioUrl} 
+                        autoPlay={msg.role === 'assistant' && autoPlayResponse && i === messages.length - 1} 
+                      />
                   </div>
-                </div>
-              ))}
-              {(streamingContent || streamingReasoning) && (
-                <div className="flex flex-col gap-2 max-w-[80%]">
-                  {streamingReasoning && (
-                    <div className="text-xs text-ink/40 font-mono bg-surface/30 p-3 rounded-xl border-l-2 border-accent/50 animate-pulse">
-                      {streamingReasoning}
-                    </div>
-                  )}
-                  {streamingContent && (
-                    <div className="bg-surface text-ink rounded-2xl rounded-tl-none p-4 text-sm leading-relaxed">
-                      {streamingContent}
-                      <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-accent animate-pulse" />
-                    </div>
-                  )}
+                )}
+                {msg.content}
+              </div>
+            </div>
+          ))}
+          {(streamingContent || streamingReasoning) && (
+            <div className="flex flex-col gap-2 max-w-[80%]">
+              {streamingReasoning && (
+                <div className="text-xs text-ink/40 font-mono bg-surface/30 p-3 rounded-xl border-l-2 border-accent/50 animate-pulse">
+                  {streamingReasoning}
                 </div>
               )}
-              <div ref={messagesEndRef} />
-            </>
+              {streamingContent && (
+                <div className="bg-surface text-ink rounded-2xl rounded-tl-none p-4 text-sm leading-relaxed">
+                  {streamingContent}
+                  <span className="inline-block w-1.5 h-4 ml-1 align-middle bg-accent animate-pulse" />
+                </div>
+              )}
+            </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
 
           {/* Input Area */}
