@@ -327,7 +327,7 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] gap-6 overflow-hidden">
+    <div className="flex h-[calc(100vh-8rem)] gap-6 overflow-hidden">
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col rounded-3xl bg-panel border border-white/5 shadow-soft overflow-hidden relative">
         {/* Chat Area Header / Status */}
@@ -435,7 +435,6 @@ const ChatPage = () => {
                 { value: 'ko', label: 'Korean' },
                 { value: 'pl', label: 'Polish' },
                 { value: 'pt', label: 'Portuguese' },
-                { value: 'ru', label: 'Russian' },
                 { value: 'es', label: 'Spanish' },
                 { value: 'uk', label: 'Ukrainian' },
                 { value: 'vi', label: 'Vietnamese' },
