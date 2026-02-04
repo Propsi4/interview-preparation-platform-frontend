@@ -236,6 +236,8 @@ const ChatPage = () => {
 
   const handleVoiceUpload = async (blob: Blob, userAudioUrl: string, langCode: string) => {
     setStreaming(true)
+    setStreamingContent('')
+    setStreamingReasoning('')
     let transcript = ''
     let answer = ''
     audioChunksRef.current = []
@@ -247,7 +249,9 @@ const ChatPage = () => {
         blob,
         true,
         (event) => {
-          if (event.type === 'transcript') {
+          if (event.type === 'reasoning') {
+            setStreamingReasoning(prev => prev + (event.data.token as string))
+          } else if (event.type === 'transcript') {
             const data = event.data as Record<string, unknown>
             if (data.text) {
               transcript = data.text as string
@@ -276,6 +280,7 @@ const ChatPage = () => {
             }])
 
             setStreamingContent('')
+            setStreamingReasoning('')
           }
         },
         langCode

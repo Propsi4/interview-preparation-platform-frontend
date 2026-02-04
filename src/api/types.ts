@@ -27,7 +27,10 @@ export type ChatSessionOverview = {
   total_messages: number
   interview_finished: boolean
   updated_at: string
+  created_at: string
   search_query_id: number | null
+  price: number
+  evaluated: boolean
 }
 
 export type ChatSessionDetails = {
@@ -39,16 +42,23 @@ export type ChatSessionDetails = {
   interview_finished: boolean
   evaluated: boolean
   search_query_id: number | null
+  price: number
   messages: ChatMessage[]
 }
 
 export type EvaluationScore = {
   id: number
   search_query_id: number
+  search_query_text: string
   chat_session_id: string
   score: number
   strong_sides: string | null
   weak_sides: string | null
+  vacancy_id: number
+  vacancy_title: string | null
+  vacancy_company: string | null
+  vacancy_url: string | null
+  vacancy_location: string | null
   created_at: string
   updated_at: string
 }
