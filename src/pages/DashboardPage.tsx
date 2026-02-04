@@ -53,7 +53,7 @@ const DashboardPage = () => {
       <section className="space-y-2">
         <h1 className="text-3xl font-bold text-ink">Welcome back</h1>
         <p className="text-ink/60">
-          Ready to ace your next technical interview?
+          Ready to ace your next interview?
         </p>
       </section>
 
@@ -123,7 +123,7 @@ const DashboardPage = () => {
           <div className="rounded-3xl bg-gradient-to-br from-accent to-yellow-600 p-6 shadow-soft text-surface">
             <h2 className="text-xl font-bold mb-2">Quick Start</h2>
             <p className="text-sm opacity-90 mb-6">
-              Launch a new technical interview session immediately.
+              Launch a new interview session immediately.
             </p>
             <button
               onClick={handleStartNewInterview}
