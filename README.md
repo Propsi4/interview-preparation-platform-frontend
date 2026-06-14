@@ -71,3 +71,10 @@ export default defineConfig([
   },
 ])
 ```
+
+## Testing
+
+End-to-End (E2E) tests for this frontend are located in the backend repository under `codebase/ml/tests/e2e`. They are automated using Playwright and pytest.
+
+To run the E2E tests, refer to the instructions in the [ML README](../ml/README.md#testing).
+
